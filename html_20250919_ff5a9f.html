@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門消費券記錄系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #006c35 0%, #009f4d 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        header {
+            background: linear-gradient(135deg, #006c35 0%, #009f4d 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .macau-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="50%" y="50%" font-size="20" text-anchor="middle" fill="white">澳門</text></svg>');
+            background-repeat: repeat;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .form-section, .records-section {
+            flex: 1;
+            min-width: 300px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            color: #006c35;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .amount-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .amount-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        button {
+            background-color: #006c35;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        button:hover {
+            background-color: #009f4d;
+        }
+        
+        .week-group {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .week-header {
+            background-color: #e0f0e9;
+            padding: 10px 12px;
+            font-weight: bold;
+            color: #006c35;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .week-total {
+            background-color: #006c35;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        
+        .week-content {
+            display: block; /* 默认展开 */
+            padding: 0;
+        }
+        
+        .platform-group {
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .platform-header {
+            background-color: #f0f7f3;
+            padding: 8px 12px;
+            font-weight: bold;
+            color: #006c35;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .platform-required {
+            font-size: 0.8rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .voucher-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        
+        .voucher-table th, .voucher-table td {
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .voucher-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+        
+        .voucher-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .used {
+            text-decoration: line-through;
+            color: #999;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .btn-delete {
+            background-color: #e74c3c;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+            padding: 15px;
+            background: #f0f7f3;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.8rem;
+        }
+        
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+            color: #006c35;
+        }
+        
+        .checkbox-large {
+            transform: scale(1.2);
+            margin-right: 8px;
+        }
+        
+        .required-spending {
+            background: #fff4f4;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .total-required-top {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .required-spending h4 {
+            color: #e74c3c;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .required-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .required-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            font-size: 0.8rem;
+        }
+        
+        .required-amount {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .amount-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .voucher-table {
+                font-size: 0.7rem;
+            }
+            
+            .required-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="macau-pattern"></div>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-receipt logo-icon"></i>
+                    <h1>澳門消費券記錄系統</h1>
+                </div>
+                <p>記錄您的消費券獲取與使用情況</p>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <section class="form-section">
+                <h2 class="section-title"><i class="fas fa-plus-circle"></i> 新增消費券</h2>
+                <form id="voucher-form">
+                    <div class="form-group">
+                        <label for="date">獲取日期</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="platform">獲取平台</label>
+                        <select id="platform" required>
+                            <option value="">選擇平台</option>
+                            <option value="MPay澳門錢包">MPay澳門錢包</option>
+                            <option value="支付寶（澳門）">支付寶（澳門）</option>
+                            <option value="澳門中銀手機銀行">澳門中銀手機銀行</option>
+                            <option value="工銀e支付">工銀e支付</option>
+                            <option value="豐付寶">豐付寶</option>
+                            <option value="廣發移動支付錢包">廣發移動支付錢包</option>
+                            <option value="LusoPay（國際銀行）">LusoPay（國際銀行）</option>
+                            <option value="極易付澳門錢包(UePay)">極易付澳門錢包(UePay)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>金額 (MOP) - 可一次新增3個紀錄</label>
+                        <div class="amount-grid">
+                            <div class="amount-item">
+                                <select class="amount-input">
+                                    <option value="0">0</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                            <div class="amount-item">
+                                <select class="amount-input">
+                                    <option value="0">0</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                            <div class="amount-item">
+                                <select class="amount-input">
+                                    <option value="0">0</option>
+                                    <option value="10">极速</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit"><i class="fas fa-plus-circle"></i> 添加消費券</button>
+                </form>
+
+                <div class="required-spending">
+                    <div class="total-required-top">
+                        <span>本週總需消費金額:</span>
+                        <span id="total-required-amount">MOP 0</span>
+                    </div>
+                    <h4><i class="fas fa-exclamation-circle"></i> 各平台還需消費金額</h4>
+                    <div class="required-list" id="required-list">
+                        <!-- 平台需消费金额将在这里动态生成 -->
+                    </div>
+                </div>
+            </section>
+            
+            <section class="records-section">
+                <h2 class="section-title"><i class="fas fa-history"></i> 消費券記錄</h2>
+                <div class="action-buttons">
+                    <button id="btn-export"><i class="fas fa-download"></i> 導出數據</button>
+                    <button id="btn-clear" class="btn-delete"><i class="fas fa-trash"></i> 清除記錄</button>
+                </div>
+                <div id="records-container">
+                    <!-- 記錄將在這裡動態添加 -->
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>© 2023 澳門消費券記錄系統 - 輕鬆管理您的消費券</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('voucher-form');
+            const recordsContainer = document.getElementById('records-container');
+            const btnClear = document.getElementById('btn-clear');
+            const btnExport = document.getElementById('btn-export');
+            const requiredList = document.getElementById('required-list');
+            const totalRequiredAmount = document.getElementById('total-required-amount');
+            const dateInput = document.getElementById('date');
+            const platformSelect = document.getElementById('platform');
+            const amountInputs = document.querySelectorAll('.amount-input');
+            
+            // 设置默认日期为今天
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+            
+            // 从本地存储加载记录或初始化空数组
+            let records = JSON.parse(localStorage.getItem('macauVouchers')) || [];
+            
+            // 记住上次使用的日期
+            let lastUsedDate = localStorage.getItem('lastUsedDate') || today;
+            dateInput.value = lastUsedDate;
+            
+            // 渲染记录函数
+            function renderRecords() {
+                recordsContainer.innerHTML = '';
+                
+                if (records.length === 0) {
+                    recordsContainer.innerHTML = '<p style="text-align: center; padding: 15px;">暫無記錄，請添加您的消費券記錄</p>';
+                    updateRequiredSpending();
+                    return;
+                }
+                
+                // 按周分组
+                const groupedByWeek = groupByWeek(records);
+                
+                // 获取周键并按时间顺序排序（最新的在前）
+                const weekKeys = Object.keys(groupedByWeek).sort((a, b) => {
+                    const [aYear, aWeek] = a.split('-W').map(Number);
+                    const [bYear, bWeek] = b.split('-W').map(Number);
+                    
+                    // 按年份和周数排序，最新的在前
+                    if (aYear !== bYear) {
+                        return bYear - aYear;
+                    }
+                    return bWeek - aWeek;
+                });
+                
+                // 渲染分组记录
+                weekKeys.forEach(weekKey => {
+                    const weekData = groupedByWeek[weekKey];
+                    const weekElement = createWeekElement(weekKey, weekData);
+                    recordsContainer.appendChild(weekElement);
+                });
+                
+                updateRequiredSpending();
+            }
+            
+            // 获取周数
+            function getWeekNumber(date) {
+                const d = new Date(date);
+                d.setHours(0, 0, 0, 0);
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                const yearStart = new Date(d.getFullYear(), 0, 1);
+                const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+                return weekNo;
+            }
+            
+            // 按周分组
+            function groupByWeek(records) {
+                const grouped = {};
+                
+                records.forEach(record => {
+                    const weekKey = getWeekKey(record.date);
+                    if (!grouped[weekKey]) {
+                        grouped[weekKey] = {};
+                    }
+                    
+                    if (!grouped[weekKey][record.platform]) {
+                        grouped[weekKey][record.platform] = [];
+                    }
+                    
+                    grouped[weekKey][record.platform].push(record);
+                });
+                
+                return grouped;
+            }
+            
+            // 获取周键
+            function getWeekKey(dateString) {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const weekNum = getWeekNumber(date);
+                return `${year}-W${weekNum}`;
+            }
+            
+            // 创建周元素
+            function createWeekElement(weekKey, weekData) {
+                const weekElement = document.createElement('div');
+                weekElement.className = 'week-group';
+                
+                const [year, weekNum] = weekKey.split('-W');
+                const weekStart = getDateOfISOWeek(weekNum, year);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                // 计算该周获取的总金额
+                let weekTotal = 0;
+                Object.keys(weekData).forEach(platform => {
+                    weekTotal += weekData[platform].reduce((sum, record) => sum + parseInt(record.amount), 0);
+                });
+                
+                const weekHeader = document.createElement('div');
+                weekHeader.className = 'week-header';
+                weekHeader.innerHTML = `
+                    <span>${year}年 第${weekNum}週 (${formatDate(weekStart)} - ${formatDate(weekEnd)})</span>
+                    <span class="week-total">總獲得: MOP ${weekTotal}</span>
+                    <i class="fas fa-chevron-down"></i>
+                `;
+                
+                const weekContent = document.createElement('div');
+                weekContent.className = 'week-content';
+                weekContent.style.display = 'block'; // 默认展开
+                
+                // 添加平台分组
+                Object.keys(weekData).forEach(platform => {
+                    const platformGroup = document.createElement('div');
+                    platformGroup.className = 'platform-group';
+                    
+                    // 计算该平台本周获取的总金额
+                    const totalAmount = weekData[platform].reduce((sum, record) => sum + parseInt(record.amount), 0);
+                    const requiredAmount = totalAmount * 3;
+                    const usedAmount = weekData[platform]
+                        .filter(record => record.used)
+                        .reduce((sum, record) => sum + (parseInt(record.amount) * 3), 0);
+                    const remainingAmount = requiredAmount - usedAmount;
+                    
+                    const platformHeader = document.createElement('div');
+                    platformHeader.className = 'platform-header';
+                    platformHeader.innerHTML = `
+                        <span>${platform}</span>
+                        <span class="platform-required">還需消費: MOP ${remainingAmount > 0 ? remainingAmount : 0}</span>
+                    `;
+                    
+                    const table = document.createElement('table');
+                    table.className = 'voucher-table';
+                    
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th>日期</th>
+                            <th>金額 (MOP)</th>
+                            <th>已使用</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    
+                    const tbody = document.createElement('tbody');
+                    
+                    // 按日期排序（最新的在前）
+                    const sortedRecords = [...weekData[platform]].sort((a, b) => {
+                        return new Date(b.date) - new Date(a.date);
+                    });
+                    
+                    sortedRecords.forEach(record => {
+                        const row = document.createElement('tr');
+                        if (record.used) {
+                            row.classList.add('used');
+                        }
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = formatDate(record.date);
+                        
+                        const amountCell = document.createElement('td');
+                        amountCell.textContent = record.amount;
+                        
+                        const usedCell = document.createElement('td');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.className = 'checkbox-large';
+                        checkbox.checked = record.used || false;
+                        checkbox.addEventListener('change', function() {
+                            record.used = this.checked;
+                            localStorage.setItem('macauVouchers', JSON.stringify(records));
+                            renderRecords();
+                        });
+                        usedCell.appendChild(checkbox);
+                        
+                        const actionCell = document.createElement('td');
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn-delete';
+                        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                        deleteBtn.addEventListener('click', function(e) {
+                            e.stopPropagation(); // 防止事件冒泡
+                            if (confirm('確定要刪除此記錄嗎？')) {
+                                const index = records.findIndex(r => r.id === record.id);
+                                if (index !== -1) {
+                                    records.splice(index, 1);
+                                    localStorage.setItem('macauVouchers', JSON.stringify(records));
+                                    renderRecords();
+                                }
+                            }
+                        });
+                        actionCell.appendChild(deleteBtn);
+                        
+                        row.appendChild(dateCell);
+                        row.appendChild(amountCell);
+                        row.appendChild(usedCell);
+                        row.appendChild(actionCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                    
+                    table.appendChild(thead);
+                    table.appendChild(tbody);
+                    
+                    platformGroup.appendChild(platformHeader);
+                    platformGroup.appendChild(table);
+                    weekContent.appendChild(platformGroup);
+                });
+                
+                // 周标题点击展开/折叠
+                weekHeader.addEventListener('click', function() {
+                    const isExpanded = weekContent.style.display === 'block';
+                    weekContent.style.display = isExpanded ? 'none' : 'block';
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('fa-chevron-down');
+                    icon.classList.toggle('fa-chevron-up');
+                });
+                
+                weekElement.appendChild(weekHeader);
+                weekElement.appendChild(weekContent);
+                
+                return weekElement;
+            }
+            
+            // 获取ISO周的日期
+            function getDateOfISOWeek(week, year) {
+                const simple = new Date(year, 0, 1 + (week - 1) * 7);
+                const dow = simple.getDay();
+                const ISOWeekStart = simple;
+                if (dow <= 4) {
+                    ISOWeekStart.setDate(simple.getDate() - simple.getDay() + 1);
+                } else {
+                    ISOWeekStart.setDate(simple.getDate() + 8 - simple.getDay());
+                }
+                return ISOWeekStart;
+            }
+            
+            // 更新各平台还需消费金额
+            function updateRequiredSpending() {
+                requiredList.innerHTML = '';
+                
+                // 获取当前周
+                const currentDate = new Date();
+                const currentWeekKey = getWeekKey(currentDate);
+                
+                // 按平台分组
+                const platformGroups = {};
+                records.forEach(record => {
+                    // 只计算本周的记录
+                    if (getWeekKey(record.date) === currentWeekKey) {
+                        if (!platformGroups[record.platform]) {
+                            platformGroups[record.platform] = [];
+                        }
+                        platformGroups[record.platform].push(record);
+                    }
+                });
+                
+                let totalRequired = 0;
+                
+                // 计算每个平台还需消费金额
+                Object.keys(platformGroups).forEach(platform => {
+                    const totalAmount = platformGroups[platform].reduce((sum, record) => sum + parseInt(record.amount), 0);
+                    const requiredAmount = totalAmount * 3;
+                    const usedAmount = platformGroups[platform]
+                        .filter(record => record.used)
+                        .reduce((sum, record) => sum + (parseInt(record.amount) * 3), 0);
+                    const remainingAmount = requiredAmount - usedAmount;
+                    
+                    totalRequired += remainingAmount > 0 ? remainingAmount : 0;
+                    
+                    const requiredItem = document.createElement('div');
+                    requiredItem.className = 'required-item';
+                    
+                    const platformName = document.createElement('span');
+                    platformName.textContent = platform;
+                    
+                    const requiredAmountSpan = document.createElement('span');
+                    requiredAmountSpan.className = 'required-amount';
+                    requiredAmountSpan.textContent = `MOP ${remainingAmount > 0 ? remainingAmount : 0}`;
+                    
+                    requiredItem.appendChild(platformName);
+                    requiredItem.appendChild(requiredAmountSpan);
+                    requiredList.appendChild(requiredItem);
+                });
+                
+                // 更新总需消费金额
+                totalRequiredAmount.textContent = `MOP ${totalRequired}`;
+            }
+            
+            // 格式化日期显示
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('zh-TW');
+            }
+            
+            // 表单提交处理
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const date = document.getElementById('date').value;
+                const platform = document.getElementById('platform').value;
+                
+                if (!date || !platform) {
+                    alert('請填寫所有必填欄位');
+                    return;
+                }
+                
+                // 检查平台获取次数
+                const weekKey = getWeekKey(date);
+                const weeklyCount = records.filter(record => 
+                    record.platform === platform &&
+                    getWeekKey(record.date) === weekKey
+                ).length;
+                
+                const selectedAmounts = Array.from(amountInputs)
+                    .map(input => input.value);
+                
+                if (weeklyCount + selectedAmounts.length > 3) {
+                    alert(`本週在 ${platform} 上已經獲取了${weeklyCount}次消費券，最多只能獲取3次`);
+                    return;
+                }
+                
+                // 保存当前日期供下次使用
+                lastUsedDate = date;
+                localStorage.setItem('lastUsedDate', lastUsedDate);
+                
+                // 添加所有金额的记录（包括0）
+                selectedAmounts.forEach(amount => {
+                    const newRecord = {
+                        id: Date.now() + Math.random(), // 唯一ID
+                        date,
+                        amount,
+                        platform,
+                        used: false
+                    };
+                    
+                    records.push(newRecord);
+                });
+                
+                localStorage.setItem('macauVouchers', JSON.stringify(records));
+                
+                renderRecords();
+                
+                // 重置金额选择为0
+                amountInputs.forEach(input => {
+                    input.value = '0';
+                });
+            });
+            
+            // 清除记录按钮
+            btnClear.addEventListener('click', function() {
+                if (confirm('確定要清除所有記錄嗎？此操作無法復原。')) {
+                    records = [];
+                    localStorage.removeItem('macauVouchers');
+                    localStorage.removeItem('lastUsedDate');
+                    renderRecords();
+                }
+            });
+            
+            // 导出数据按钮
+            btnExport.addEventListener('click', function() {
+                if (records.length === 0) {
+                    alert('暫無數據可導出');
+                    return;
+                }
+                
+                let csvContent = "日期,金額,平台,已使用\n";
+                
+                records.forEach(record => {
+                    const row = [
+                        formatDate(record.date),
+                        record.amount,
+                        record.platform,
+                        record.used ? '是' : '否'
+                    ];
+                    csvContent += row.join(',') + '\n';
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', '澳門消費券記錄.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+            
+            // 初始渲染记录
+            renderRecords();
+        });
+    </script>
+</body>
+</html>
