@@ -3,482 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>澳門消費券記錄系統</title>
+    <title>澳門消費券紀錄系統</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
-            font-size: 14px;
+            font-family: "Helvetica Neue", Arial, sans-serif;
         }
-        
         body {
-            background-color: #f0f2f5;
+            background-color: #f5f5f5;
             color: #333;
+            font-size: 14px;
+            line-height: 1.4;
             padding: 10px;
         }
-        
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 12px;
-            overflow-x: auto;
         }
-        
         header {
             text-align: center;
             margin-bottom: 15px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eaeaea;
+            padding: 10px;
+            background: #0066cc;
+            color: white;
+            border-radius: 5px;
         }
-        
         h1 {
-            color: #2c3e50;
-            margin-bottom: 6px;
             font-size: 18px;
+            font-weight: normal;
         }
-        
-        .description {
-            color: #7f8c8d;
-            font-size: 12px;
+        .week-info {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #666;
         }
-        
-        .controls {
+        .platform {
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .platform-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        .week-selector {
-            display: flex;
             align-items: center;
-            gap: 8px;
+            padding: 10px;
+            background: #e6f2ff;
+            border-bottom: 1px solid #ddd;
         }
-        
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-size: 12px;
-        }
-        
-        button:hover {
-            background: #2980b9;
-        }
-        
-        .add-platform {
-            background: #2ecc71;
-        }
-        
-        .add-platform:hover {
-            background: #27ae60;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-            table-layout: fixed;
-        }
-        
-        th, td {
-            padding: 8px 4px;
-            text-align: center;
-            border-bottom: 1px solid #eaeaea;
-            word-wrap: break-word;
-        }
-        
-        th {
-            background-color: #34495e;
-            color: white;
+        .platform-name {
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
         }
-        
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .required-amount {
+            color: #cc0000;
+            font-size: 13px;
         }
-        
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        
-        select, input[type="number"] {
-            padding: 4px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            width: 100%;
-            font-size: 12px;
-        }
-        
-        .required-consumption {
-            font-weight: bold;
-            color: #e74c3c;
-        }
-        
-        .coupon-used {
-            color: #2ecc71;
-        }
-        
-        .coupon-not-used {
-            color: #e74c3c;
-        }
-        
-        .delete-btn {
-            background: #e74c3c;
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-        
-        .delete-btn:hover {
-            background: #c0392b;
-        }
-        
-        .coupon-status {
+        .coupons {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            padding: 10px;
+            justify-content: space-between;
         }
-        
+        .coupon {
+            width: 30%;
+            text-align: center;
+            position: relative;
+        }
+        .coupon-amount {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 0;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            background: #fffae6;
+        }
+        .coupon-amount.used {
+            background: #f0f0f0;
+            color: #999;
+            text-decoration: line-through;
+        }
         .coupon-checkbox {
-            margin: 0 auto;
             transform: scale(0.8);
         }
-        
-        @media (max-width: 480px) {
-            th, td {
-                padding: 6px 2px;
-            }
-            
-            .platform-name {
-                min-width: 80px;
-            }
-            
-            .coupon-amount, .consumption, .action {
-                min-width: 60px;
-            }
-        }
-        
-        .instructions {
-            margin-top: 15px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
+        .coupon-label {
             font-size: 12px;
             color: #666;
         }
-        
-        .instructions h3 {
-            margin-bottom: 5px;
-            color: #2c3e50;
-            font-size: 13px;
+        .summary {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        
-        .instructions ul {
-            padding-left: 18px;
-        }
-        
-        .instructions li {
-            margin-bottom: 3px;
+        .total-required {
+            font-size: 16px;
+            color: #cc0000;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>澳門消費券記錄系統</h1>
-            <p class="description">記錄各平台消費券金額及使用情況，每週重新計算</p>
+            <h1>澳門消費券紀錄系統</h1>
         </header>
         
-        <div class="controls">
-            <div class="week-selector">
-                <label for="week">選擇週數：</label>
-                <select id="week">
-                    <option value="1">第1週</option>
-                    <option value="2">第2週</option>
-                    <option value="3">第3週</option>
-                    <option value="4">第4週</option>
-                </select>
-                <button id="reset-btn">重置本週數據</button>
-            </div>
-            <button id="add-platform-btn" class="add-platform">添加平台</button>
+        <div class="week-info" id="week-info">
+            <!-- 週數資訊將由JavaScript動態生成 -->
         </div>
         
-        <table id="voucher-table">
-            <thead>
-                <tr>
-                    <th class="platform-name">平台</th>
-                    <th class="coupon-amount">券1 (MOP)</th>
-                    <th class="coupon-amount">已使用</th>
-                    <th class="coupon-amount">券2 (MOP)</th>
-                    <th class="coupon-amount">已使用</th>
-                    <th class="coupon-amount">券3 (MOP)</th>
-                    <th class="coupon-amount">已使用</th>
-                    <th class="consumption">需消費金額 (MOP)</th>
-                    <th class="action">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 數據將通過JavaScript動態生成 -->
-            </tbody>
-        </table>
+        <div id="platforms-container">
+            <!-- 平台資訊將由JavaScript動態生成 -->
+        </div>
         
-        <div class="instructions">
-            <h3>使用說明：</h3>
-            <ul>
-                <li>每個平台每週只能出現一次</li>
-                <li>每張券可以單獨標記已使用</li>
-                <li>需消費金額 = 該平台所得券總額 × 3</li>
-                <li>每使用10元券，需消費金額自動減少30元</li>
-                <li>數據會自動保存到瀏覽器本地</li>
-            </ul>
+        <div class="summary">
+            <div>總需消費金額</div>
+            <div class="total-required" id="total-required">0 MOP</div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 支持的平台和券金額
-            const platforms = ['MPay', '中銀BOC', '工銀ICBC', '豐付寶', 'Luso國際銀行', '廣發GFB', 'UePay', '支付寶Alipay', 'TFB', 'IGBG'];
-            const voucherAmounts = [0, 10, 20, 50, 100, 200];
+            // 平台數據
+            const platforms = [
+                { id: 'mpay', name: 'MPay' },
+                { id: 'boc', name: '中銀BOC' },
+                { id: 'icbc', name: '工銀ICBC' },
+                { id: 'ffp', name: '豐付寶' },
+                { id: 'luso', name: 'Luso國際銀行' },
+                { id: 'cgb', name: '廣發' },
+                { id: 'uepay', name: 'UePay' },
+                { id: 'alipay', name: '支付寶' }
+            ];
             
-            const tableBody = document.querySelector('#voucher-table tbody');
-            const addPlatformBtn = document.getElementById('add-platform-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const weekSelector = document.getElementById('week');
+            // 消費券金額選項
+            const couponAmounts = [0, 10, 20, 50, 100, 200];
             
-            // 初始化數據
-            let voucherData = JSON.parse(localStorage.getItem('voucherData')) || {};
-            let currentWeek = localStorage.getItem('currentWeek') || '1';
-            
-            // 設置當前週
-            weekSelector.value = currentWeek;
-            
-            // 如果當前週沒有數據，初始化空數據
-            if (!voucherData[currentWeek]) {
-                voucherData[currentWeek] = [];
-                // 添加一些示例數據
-                voucherData[currentWeek].push(
-                    { 
-                        platform: 'Luso國際銀行', 
-                        coupons: [0, 0, 0], 
-                        used: [true, true, true] 
-                    },
-                    { 
-                        platform: 'IGBG', 
-                        coupons: [10, 10, 20], 
-                        used: [true, true, true] 
-                    },
-                    { 
-                        platform: '支付寶Alipay', 
-                        coupons: [10, 20, 0], 
-                        used: [false, false, true] 
-                    },
-                    { 
-                        platform: 'TFB', 
-                        coupons: [10, 0, 0], 
-                        used: [true, true, true] 
-                    },
-                    { 
-                        platform: 'UePay', 
-                        coupons: [10, 10, 0], 
-                        used: [true, true, true] 
-                    },
-                    { 
-                        platform: '中銀BOC', 
-                        coupons: [20, 20, 10], 
-                        used: [false, false, false] 
-                    },
-                    { 
-                        platform: 'MPay', 
-                        coupons: [20, 10, 10], 
-                        used: [false, false, false] 
-                    },
-                    { 
-                        platform: '廣發GFB', 
-                        coupons: [50, 20, 20], 
-                        used: [true, true, true] 
-                    }
-                );
-                saveData();
+            // 獲取當前週數 (以每年第一週為1月1日開始的週)
+            function getCurrentWeek() {
+                const now = new Date();
+                const start = new Date(now.getFullYear(), 0, 1);
+                const diff = now - start;
+                const oneWeek = 7 * 24 * 60 * 60 * 1000;
+                return Math.ceil(diff / oneWeek);
             }
             
-            // 渲染表格
-            renderTable();
+            // 更新週數顯示
+            function updateWeekInfo() {
+                const currentWeek = getCurrentWeek();
+                const year = new Date().getFullYear();
+                document.getElementById('week-info').textContent = `第 ${currentWeek} 週 (${year}年)`;
+                return currentWeek;
+            }
             
-            // 添加平台事件監聽
-            addPlatformBtn.addEventListener('click', function() {
-                const availablePlatforms = platforms.filter(platform => 
-                    !voucherData[currentWeek].some(item => item.platform === platform)
-                );
+            // 從本地存儲加載數據或初始化
+            function loadData() {
+                const currentWeek = getCurrentWeek();
+                const savedData = localStorage.getItem(`couponData_${currentWeek}`);
                 
-                if (availablePlatforms.length === 0) {
-                    alert('所有平台都已添加！');
-                    return;
+                if (savedData) {
+                    return JSON.parse(savedData);
+                } else {
+                    // 初始化數據結構
+                    const data = {};
+                    platforms.forEach(platform => {
+                        data[platform.id] = {
+                            coupons: [0, 0, 0],
+                            used: [false, false, false]
+                        };
+                    });
+                    return data;
                 }
-                
-                voucherData[currentWeek].push({
-                    platform: availablePlatforms[0],
-                    coupons: [0, 0, 0],
-                    used: [false, false, false]
-                });
-                
-                saveData();
-                renderTable();
-            });
+            }
             
-            // 重置本週數據
-            resetBtn.addEventListener('click', function() {
-                if (confirm('確定要重置本週的所有數據嗎？此操作不可撤銷。')) {
-                    voucherData[currentWeek] = [];
-                    saveData();
-                    renderTable();
-                }
-            });
+            // 保存數據到本地存儲
+            function saveData(data) {
+                const currentWeek = getCurrentWeek();
+                localStorage.setItem(`couponData_${currentWeek}`, JSON.stringify(data));
+            }
             
-            // 週數選擇變化
-            weekSelector.addEventListener('change', function() {
-                currentWeek = this.value;
-                localStorage.setItem('currentWeek', currentWeek);
-                
-                // 如果選擇的週沒有數據，初始化空數據
-                if (!voucherData[currentWeek]) {
-                    voucherData[currentWeek] = [];
-                    saveData();
-                }
-                
-                renderTable();
-            });
-            
-            // 計算需消費金額
-            function calculateRequiredConsumption(coupons, used) {
-                let totalCouponValue = 0;
-                let usedCouponValue = 0;
-                
+            // 計算平台需消費金額
+            function calculateRequiredAmount(platformData) {
+                let total = 0;
                 for (let i = 0; i < 3; i++) {
-                    totalCouponValue += coupons[i];
-                    if (used[i]) {
-                        usedCouponValue += coupons[i];
+                    if (!platformData.used[i]) {
+                        total += platformData.coupons[i] * 3;
                     }
                 }
-                
-                // 需消費金額 = 券總額 × 3 - 已使用券額 × 3
-                return (totalCouponValue * 3) - (usedCouponValue * 3);
+                return total;
             }
             
-            // 渲染表格函數
-            function renderTable() {
-                tableBody.innerHTML = '';
-                
-                voucherData[currentWeek].forEach((item, index) => {
-                    const row = document.createElement('tr');
-                    
-                    // 計算需消費金額
-                    const requiredConsumption = calculateRequiredConsumption(item.coupons, item.used);
-                    
-                    row.innerHTML = `
-                        <td>
-                            <select class="platform-select" data-index="${index}">
-                                ${platforms.map(platform => 
-                                    `<option value="${platform}" ${platform === item.platform ? 'selected' : ''}>${platform}</option>`
-                                ).join('')}
-                            </select>
-                        </td>
-                        <td>
-                            <select class="coupon-select" data-index="${index}" data-coupon="0">
-                                ${voucherAmounts.map(amount => 
-                                    `<option value="${amount}" ${amount === item.coupons[0] ? 'selected' : ''}>${amount}</option>`
-                                ).join('')}
-                            </select>
-                        </td>
-                        <td class="coupon-status">
-                            <input type="checkbox" class="coupon-checkbox used-coupon" data-index="${index}" data-coupon="0" ${item.used[0] ? 'checked' : ''}>
-                        </td>
-                        <td>
-                            <select class="coupon-select" data-index="${index}" data-coupon="1">
-                                ${voucherAmounts.map(amount => 
-                                    `<option value="${amount}" ${amount === item.coupons[1] ? 'selected' : ''}>${amount}</option>`
-                                ).join('')}
-                            </select>
-                        </td>
-                        <td class="coupon-status">
-                            <input type="checkbox" class="coupon-checkbox used-coupon" data-index="${index}" data-coupon="1" ${item.used[1] ? 'checked' : ''}>
-                        </td>
-                        <td>
-                            <select class="coupon-select" data-index="${index}" data-coupon="2">
-                                ${voucherAmounts.map(amount => 
-                                    `<option value="${amount}" ${amount === item.coupons[2] ? 'selected' : ''}>${amount}</option>`
-                                ).join('')}
-                            </select>
-                        </td>
-                        <td class="coupon-status">
-                            <input type="checkbox" class="coupon-checkbox used-coupon" data-index="${index}" data-coupon="2" ${item.used[2] ? 'checked' : ''}>
-                        </td>
-                        <td class="required-consumption">
-                            ${requiredConsumption}
-                        </td>
-                        <td>
-                            <button class="delete-btn" data-index="${index}">刪除</button>
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
+            // 計算總需消費金額
+            function calculateTotalRequiredAmount(data) {
+                let total = 0;
+                platforms.forEach(platform => {
+                    total += calculateRequiredAmount(data[platform.id]);
                 });
+                return total;
+            }
+            
+            // 生成平台HTML
+            function createPlatformHTML(platform, data) {
+                const platformData = data[platform.id];
+                const requiredAmount = calculateRequiredAmount(platformData);
+                
+                return `
+                    <div class="platform" id="${platform.id}">
+                        <div class="platform-header">
+                            <div class="platform-name">${platform.name}</div>
+                            <div class="required-amount">需消費: ${requiredAmount} MOP</div>
+                        </div>
+                        <div class="coupons">
+                            ${[0, 1, 2].map(i => `
+                                <div class="coupon">
+                                    <div class="coupon-amount ${platformData.used[i] ? 'used' : ''}" id="${platform.id}-amount-${i}">
+                                        ${platformData.coupons[i]} MOP
+                                    </div>
+                                    <label class="coupon-label">
+                                        <input type="checkbox" class="coupon-checkbox" 
+                                            ${platformData.used[i] ? 'checked' : ''}
+                                            data-platform="${platform.id}" 
+                                            data-index="${i}"
+                                            ${platformData.coupons[i] === 0 ? 'disabled' : ''}>
+                                        已使用
+                                    </label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 初始化頁面
+            function initializePage() {
+                const currentWeek = updateWeekInfo();
+                const data = loadData();
+                
+                // 生成平台HTML
+                const platformsContainer = document.getElementById('platforms-container');
+                platformsContainer.innerHTML = '';
+                
+                platforms.forEach(platform => {
+                    platformsContainer.innerHTML += createPlatformHTML(platform, data);
+                });
+                
+                // 更新總需消費金額
+                document.getElementById('total-required').textContent = 
+                    `${calculateTotalRequiredAmount(data)} MOP`;
                 
                 // 添加事件監聽器
-                document.querySelectorAll('.platform-select').forEach(select => {
-                    select.addEventListener('change', function() {
-                        const index = this.getAttribute('data-index');
-                        voucherData[currentWeek][index].platform = this.value;
-                        saveData();
-                    });
-                });
-                
-                document.querySelectorAll('.coupon-select').forEach(select => {
-                    select.addEventListener('change', function() {
-                        const index = this.getAttribute('data-index');
-                        const couponIndex = this.getAttribute('data-coupon');
-                        voucherData[currentWeek][index].coupons[couponIndex] = parseInt(this.value);
-                        saveData();
-                        renderTable(); // 重新渲染以更新需消費金額
-                    });
-                });
-                
-                document.querySelectorAll('.used-coupon').forEach(checkbox => {
+                document.querySelectorAll('.coupon-checkbox').forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
-                        const index = this.getAttribute('data-index');
-                        const couponIndex = this.getAttribute('data-coupon');
-                        voucherData[currentWeek][index].used[couponIndex] = this.checked;
-                        saveData();
-                        renderTable(); // 重新渲染以更新需消費金額
-                    });
-                });
-                
-                document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const index = this.getAttribute('data-index');
-                        if (confirm('確定要刪除這個平台記錄嗎？')) {
-                            voucherData[currentWeek].splice(index, 1);
-                            saveData();
-                            renderTable();
+                        const platformId = this.dataset.platform;
+                        const index = parseInt(this.dataset.index);
+                        
+                        // 更新數據
+                        data[platformId].used[index] = this.checked;
+                        
+                        // 更新UI
+                        const amountElement = document.getElementById(`${platformId}-amount-${index}`);
+                        if (this.checked) {
+                            amountElement.classList.add('used');
+                        } else {
+                            amountElement.classList.remove('used');
                         }
+                        
+                        // 更新需消費金額
+                        const requiredAmount = calculateRequiredAmount(data[platformId]);
+                        document.querySelector(`#${platformId} .required-amount`).textContent = 
+                            `需消費: ${requiredAmount} MOP`;
+                        
+                        // 更新總需消費金額
+                        document.getElementById('total-required').textContent = 
+                            `${calculateTotalRequiredAmount(data)} MOP`;
+                        
+                        // 保存數據
+                        saveData(data);
                     });
                 });
             }
             
-            // 保存數據到localStorage
-            function saveData() {
-                localStorage.setItem('voucherData', JSON.stringify(voucherData));
-            }
+            // 初始化頁面
+            initializePage();
         });
     </script>
 </body>
