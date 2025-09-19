@@ -318,6 +318,27 @@
             color: #e74c3c;
         }
         
+        .amount-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .amount-badge {
+            padding: 4px 8px;
+            background: #f0f7f3;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .amount-badge.used {
+            background: #f9f9f9;
+            color: #999;
+            text-decoration: line-through;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -337,6 +358,11 @@
             
             .required-list {
                 grid-template-columns: 1fr;
+            }
+            
+            .amount-row {
+                flex-wrap: wrap;
+                gap: 5px;
             }
         }
     </style>
@@ -368,13 +394,13 @@
                         <select id="platform" required>
                             <option value="">選擇平台</option>
                             <option value="MPay澳門錢包">MPay澳門錢包</option>
-                            <option value="支付寶（澳門）">支付寶（澳門）</option>
                             <option value="澳門中銀手機銀行">澳門中銀手機銀行</option>
                             <option value="工銀e支付">工銀e支付</option>
                             <option value="豐付寶">豐付寶</option>
-                            <option value="廣發移動支付錢包">廣發移動支付錢包</option>
                             <option value="LusoPay（國際銀行）">LusoPay（國際銀行）</option>
+                            <option value="廣發移動支付錢包">廣發移動支付錢包</option>
                             <option value="極易付澳門錢包(UePay)">極易付澳門錢包(UePay)</option>
+                            <option value="支付寶（澳門）">支付寶（澳門）</option>
                         </select>
                     </div>
                     
@@ -404,7 +430,7 @@
                             <div class="amount-item">
                                 <select class="amount-input">
                                     <option value="0">0</option>
-                                    <option value="10">极速</option>
+                                    <option value="10">10</option>
                                     <option value="20">20</option>
                                     <option value="50">50</option>
                                     <option value="100">100</option>
@@ -570,8 +596,21 @@
                 weekContent.className = 'week-content';
                 weekContent.style.display = 'block'; // 默认展开
                 
-                // 添加平台分组
-                Object.keys(weekData).forEach(platform => {
+                // 添加平台分组 - 按指定顺序
+                const platformOrder = [
+                    "MPay澳門錢包",
+                    "澳門中銀手機銀行",
+                    "工銀e支付",
+                    "豐付寶",
+                    "LusoPay（國際銀行）",
+                    "廣發移動支付錢包",
+                    "極易付澳門錢包(UePay)",
+                    "支付寶（澳門）"
+                ];
+                
+                platformOrder.forEach(platform => {
+                    if (!weekData[platform]) return;
+                    
                     const platformGroup = document.createElement('div');
                     platformGroup.className = 'platform-group';
                     
@@ -590,6 +629,20 @@
                         <span class="platform-required">還需消費: MOP ${remainingAmount > 0 ? remainingAmount : 0}</span>
                     `;
                     
+                    // 按日期排序（最新的在前）
+                    const sortedRecords = [...weekData[platform]].sort((a, b) => {
+                        return new Date(b.date) - new Date(a.date);
+                    });
+                    
+                    // 将同一平台的记录按日期分组
+                    const recordsByDate = {};
+                    sortedRecords.forEach(record => {
+                        if (!recordsByDate[record.date]) {
+                            recordsByDate[record.date] = [];
+                        }
+                        recordsByDate[record.date].push(record);
+                    });
+                    
                     const table = document.createElement('table');
                     table.className = 'voucher-table';
                     
@@ -605,30 +658,44 @@
                     
                     const tbody = document.createElement('tbody');
                     
-                    // 按日期排序（最新的在前）
-                    const sortedRecords = [...weekData[platform]].sort((a, b) => {
-                        return new Date(b.date) - new Date(a.date);
-                    });
-                    
-                    sortedRecords.forEach(record => {
+                    // 处理每个日期的记录
+                    Object.keys(recordsByDate).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+                        const dateRecords = recordsByDate[date];
+                        
                         const row = document.createElement('tr');
-                        if (record.used) {
-                            row.classList.add('used');
-                        }
                         
                         const dateCell = document.createElement('td');
-                        dateCell.textContent = formatDate(record.date);
+                        dateCell.textContent = formatDate(date);
                         
                         const amountCell = document.createElement('td');
-                        amountCell.textContent = record.amount;
+                        const amountRow = document.createElement('div');
+                        amountRow.className = 'amount-row';
+                        
+                        dateRecords.forEach(record => {
+                            const amountBadge = document.createElement('span');
+                            amountBadge.className = `amount-badge ${record.used ? 'used' : ''}`;
+                            amountBadge.textContent = record.amount;
+                            amountRow.appendChild(amountBadge);
+                        });
+                        
+                        amountCell.appendChild(amountRow);
                         
                         const usedCell = document.createElement('td');
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.className = 'checkbox-large';
-                        checkbox.checked = record.used || false;
+                        
+                        // 检查是否所有记录都已使用
+                        const allUsed = dateRecords.every(record => record.used);
+                        const someUsed = dateRecords.some(record => record.used);
+                        
+                        checkbox.checked = allUsed;
+                        checkbox.indeterminate = someUsed && !allUsed;
+                        
                         checkbox.addEventListener('change', function() {
-                            record.used = this.checked;
+                            dateRecords.forEach(record => {
+                                record.used = this.checked;
+                            });
                             localStorage.setItem('macauVouchers', JSON.stringify(records));
                             renderRecords();
                         });
@@ -640,13 +707,15 @@
                         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
                         deleteBtn.addEventListener('click', function(e) {
                             e.stopPropagation(); // 防止事件冒泡
-                            if (confirm('確定要刪除此記錄嗎？')) {
-                                const index = records.findIndex(r => r.id === record.id);
-                                if (index !== -1) {
-                                    records.splice(index, 1);
-                                    localStorage.setItem('macauVouchers', JSON.stringify(records));
-                                    renderRecords();
-                                }
+                            if (confirm('確定要刪除此日期的所有記錄嗎？')) {
+                                dateRecords.forEach(record => {
+                                    const index = records.findIndex(r => r.id === record.id);
+                                    if (index !== -1) {
+                                        records.splice(index, 1);
+                                    }
+                                });
+                                localStorage.setItem('macauVouchers', JSON.stringify(records));
+                                renderRecords();
                             }
                         });
                         actionCell.appendChild(deleteBtn);
@@ -717,8 +786,21 @@
                 
                 let totalRequired = 0;
                 
-                // 计算每个平台还需消费金额
-                Object.keys(platformGroups).forEach(platform => {
+                // 按指定顺序计算每个平台还需消费金额
+                const platformOrder = [
+                    "MPay澳門錢包",
+                    "澳門中銀手機銀行",
+                    "工銀e支付",
+                    "豐付寶",
+                    "LusoPay（國際銀行）",
+                    "廣發移動支付錢包",
+                    "極易付澳門錢包(UePay)",
+                    "支付寶（澳門）"
+                ];
+                
+                platformOrder.forEach(platform => {
+                    if (!platformGroups[platform]) return;
+                    
                     const totalAmount = platformGroups[platform].reduce((sum, record) => sum + parseInt(record.amount), 0);
                     const requiredAmount = totalAmount * 3;
                     const usedAmount = platformGroups[platform]
