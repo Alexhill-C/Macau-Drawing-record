@@ -331,14 +331,6 @@
             padding-top: 15px;
         }
         
-        .batch-info {
-            background: #f0f7f3;
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 12px;
-            font-size: 0.85rem;
-        }
-        
         .amount-row {
             display: flex;
             gap: 10px;
@@ -347,6 +339,64 @@
         
         .amount-group {
             flex: 1;
+        }
+        
+        .platform-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .platform-voucher {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #f0f7f3;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .voucher-amount {
+            font-weight: bold;
+        }
+        
+        .platform-total {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #ddd;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .platform-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #f0f7f3;
+        }
+        
+        .platform-name {
+            font-weight: bold;
+            color: #006c35;
+        }
+        
+        .platform-remaining {
+            font-size: 0.85rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .voucher-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
         }
         
         @media (max-width: 768px) {
@@ -386,9 +436,31 @@
                 padding: 15px;
             }
             
+            /* 保持三个下拉列表水平排列 */
             .amount-row {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .amount-group {
+                min-width: 100px;
+                flex: none;
+            }
+            
+            .platform-row {
+                gap: 5px;
+            }
+            
+            .platform-voucher {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+            }
+            
+            .platform-info-row {
                 flex-direction: column;
-                gap: 8px;
+                align-items: flex-start;
+                gap: 5px;
             }
         }
     </style>
@@ -431,10 +503,6 @@
                     </div>
                     
                     <div class="batch-form">
-                        <div class="batch-info">
-                            <i class="fas fa-info-circle"></i> 每次可記錄最多3張消費券
-                        </div>
-                        
                         <div class="amount-row">
                             <div class="amount-group">
                                 <label for="amount1">消費券 1</label>
@@ -610,6 +678,11 @@
                 const weekContent = document.createElement('div');
                 weekContent.className = 'week-content';
                 
+                // 默认展开所有周
+                weekContent.classList.add('expanded');
+                weekHeader.querySelector('i').classList.remove('fa-chevron-down');
+                weekHeader.querySelector('i').classList.add('fa-chevron-up');
+                
                 // 添加平台分组
                 Object.keys(weekData).forEach(platform => {
                     const platformGroup = document.createElement('div');
@@ -623,41 +696,26 @@
                         .reduce((sum, record) => sum + parseInt(record.amount), 0);
                     const remainingAmount = requiredAmount - usedAmount;
                     
-                    const platformHeader = document.createElement('div');
-                    platformHeader.className = 'platform-header';
-                    platformHeader.innerHTML = `
-                        <span>${platform}</span>
-                        <span class="platform-required">還需消費: ${remainingAmount > 0 ? remainingAmount : 0}</span>
+                    // 创建平台信息行（平台名称和还需消费金额）
+                    const platformInfoRow = document.createElement('div');
+                    platformInfoRow.className = 'platform-info-row';
+                    platformInfoRow.innerHTML = `
+                        <span class="platform-name">${platform}</span>
+                        <span class="platform-remaining">還需消費: ${remainingAmount > 0 ? remainingAmount : 0}</span>
                     `;
                     
-                    const table = document.createElement('table');
-                    table.className = 'voucher-table';
+                    // 创建消费券容器
+                    const voucherContainer = document.createElement('div');
+                    voucherContainer.className = 'voucher-container';
                     
-                    const thead = document.createElement('thead');
-                    thead.innerHTML = `
-                        <tr>
-                            <th>日期</th>
-                            <th>金額</th>
-                            <th>已使用</th>
-                            <th>操作</th>
-                        </tr>
-                    `;
-                    
-                    const tbody = document.createElement('tbody');
-                    
+                    // 添加每个消费券
                     weekData[platform].forEach(record => {
-                        const row = document.createElement('tr');
+                        const voucherElement = document.createElement('div');
+                        voucherElement.className = 'platform-voucher';
                         if (record.used) {
-                            row.classList.add('used');
+                            voucherElement.classList.add('used');
                         }
                         
-                        const dateCell = document.createElement('td');
-                        dateCell.textContent = formatDate(record.date);
-                        
-                        const amountCell = document.createElement('td');
-                        amountCell.textContent = record.amount;
-                        
-                        const usedCell = document.createElement('td');
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.className = 'checkbox-large';
@@ -667,12 +725,16 @@
                             localStorage.setItem('macauVouchers', JSON.stringify(records));
                             renderRecords();
                         });
-                        usedCell.appendChild(checkbox);
                         
-                        const actionCell = document.createElement('td');
+                        const amountSpan = document.createElement('span');
+                        amountSpan.className = 'voucher-amount';
+                        amountSpan.textContent = record.amount;
+                        
                         const deleteBtn = document.createElement('button');
                         deleteBtn.className = 'btn-delete';
                         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                        deleteBtn.style.padding = '3px 6px';
+                        deleteBtn.style.fontSize = '12px';
                         deleteBtn.addEventListener('click', function() {
                             if (confirm('確定要刪除此記錄嗎？')) {
                                 const index = records.findIndex(r => r.id === record.id);
@@ -683,21 +745,16 @@
                                 }
                             }
                         });
-                        actionCell.appendChild(deleteBtn);
                         
-                        row.appendChild(dateCell);
-                        row.appendChild(amountCell);
-                        row.appendChild(usedCell);
-                        row.appendChild(actionCell);
+                        voucherElement.appendChild(checkbox);
+                        voucherElement.appendChild(amountSpan);
+                        voucherElement.appendChild(deleteBtn);
                         
-                        tbody.appendChild(row);
+                        voucherContainer.appendChild(voucherElement);
                     });
                     
-                    table.appendChild(thead);
-                    table.appendChild(tbody);
-                    
-                    platformGroup.appendChild(platformHeader);
-                    platformGroup.appendChild(table);
+                    platformGroup.appendChild(platformInfoRow);
+                    platformGroup.appendChild(voucherContainer);
                     weekContent.appendChild(platformGroup);
                 });
                 
