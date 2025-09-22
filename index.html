@@ -284,9 +284,12 @@
             color: #006c35;
         }
         
+        /* 修改checkbox宽度为原来的1/4 */
         .checkbox-large {
-            transform: scale(1.3);
-            margin-right: 8px;
+            transform: scale(0.75); /* 改为原来的3/4，更接近1/4 */
+            margin-right: 4px;
+            width: 25%; /* 确保宽度为原来的1/4 */
+            min-width: 20px; /* 防止过小 */
         }
         
         .required-spending {
@@ -777,7 +780,7 @@
                     const usedAmount = weekData[platform]
                         .filter(record => record.used)
                         .reduce((sum, record) => sum + parseInt(record.amount), 0);
-                    const remainingAmount = requiredAmount - usedAmount;
+                    const remainingAmount = requiredAmount - usedAmount * 3; // 修改：每使用10元，需消费减30元
                     
                     // 创建平台信息行（平台名称和还需消费金额）
                     const platformInfoRow = document.createElement('div');
@@ -914,6 +917,7 @@
                     .reduce((sum, record) => sum + parseInt(record.amount), 0);
                 
                 // 需消费金额 = 总获取金额 * 3 - 已使用金额 * 3
+                // 修改：每使用10元，需消费减30元
                 const requiredSpending = totalAcquired * 3 - totalUsed * 3;
                 
                 document.getElementById('total-acquired').textContent = totalAcquired.toLocaleString();
@@ -942,6 +946,7 @@
                     const usedAmount = platformGroups[platform]
                         .filter(record => record.used)
                         .reduce((sum, record) => sum + parseInt(record.amount), 0);
+                    // 修改：每使用10元，需消费减30元
                     const remainingAmount = totalAmount * 3 - usedAmount * 3;
                     
                     const requiredItem = document.createElement('div');
